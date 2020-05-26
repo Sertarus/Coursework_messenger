@@ -48,7 +48,7 @@ class RegisterActivity : AppCompatActivity() {
         mAddUserButton.setOnClickListener {
             val name = mNameET.text.toString().trim()
             val surname = mSurnameET.text.toString().trim()
-            val positon = mPositionET.text.toString().trim()
+            val position = mPositionET.text.toString().trim()
             val eMail = mEmailET.text.toString().trim()
             val password = mPasswordET.text.toString().trim()
             val passwordCheck = mPasswordCheckET.text.toString().trim()
@@ -66,12 +66,12 @@ class RegisterActivity : AppCompatActivity() {
                 passwordET.isFocusable = true
             }
             else {
-                registerUser(name, surname, positon, eMail, password)
+                registerUser(name, surname, position, eMail, password)
             }
         }
     }
 
-    private fun registerUser(name: String, surname: String, positon: String, eMail: String, password: String) {
+    private fun registerUser(name: String, surname: String, position: String, eMail: String, password: String) {
         progressBar.visibility = ProgressBar.VISIBLE
         val mAuth = FirebaseAuth.getInstance()
         mAuth.createUserWithEmailAndPassword(eMail, password)
@@ -85,7 +85,7 @@ class RegisterActivity : AppCompatActivity() {
                     data["uid"] = uid
                     data["name"] = name
                     data["surname"] = surname
-                    data["position"] = positon
+                    data["position"] = position
                     data["phone"] = ""
                     data["image"] = ""
                     data["cover"] = ""

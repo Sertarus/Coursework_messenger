@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardUseCompatPadding="true"
+    app:cardCornerRadius="2dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@color/white"
+    app:contentPadding="3dp">
+    
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <com.blogspot.atifsoftwares.circularimageview.CircularImageView
+            android:id="@+id/imageView"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:src="@drawable/ic_default_image"
+            app:c_background_color="@color/colorPrimary"
+            app:c_border="true"
+            app:c_border_color="@color/colorPrimary"
+            app:c_border_width="5.5dp"
+            app:c_shadow="true"
+            app:c_shadow_color="#000"
+            app:c_shadow_gravity="end"
+            app:c_shadow_radius="5.5" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            
+            <TextView
+                android:id="@+id/nameTV"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Person  name"
+                android:textSize="18sp"
+                android:textColor="@color/black"/>
+            <TextView
+                android:id="@+id/emailTV"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Person  email"
+                android:textColor="@color/black"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

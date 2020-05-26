@@ -5,4 +5,5 @@
     <color name="colorPrimaryVeryDark">#0A2A12</color>
     <color name="colorAccent">#FF38B240</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
 </resources>

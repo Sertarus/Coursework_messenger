@@ -95,13 +95,14 @@ class ProfileFragment : Fragment() {
             override fun onDataChange(p0: DataSnapshot) {
                 p0.children.forEach {
                     val name = it.child("name").value
+                    val surname = it.child("surname").value
                     val email = it.child("email").value
                     val phone = it.child("phone").value
                     val position = it.child("position").value
                     val image = it.child("image").value
                     val cover = it.child("cover").value
-
-                    nameTV.text = name as CharSequence?
+                    val fullName = name.toString() + " " + surname.toString()
+                    nameTV.text = fullName
                     emailTV.text = email as CharSequence?
                     phoneTV.text = phone as CharSequence?
                     positionTV.text = position as CharSequence?
@@ -289,6 +290,7 @@ class ProfileFragment : Fragment() {
             "Edit profile picture",
             "Edit cover photo",
             "Edit name",
+            "Edit surname",
             "Edit phone",
             "Edit Position"
         )
@@ -308,9 +310,12 @@ class ProfileFragment : Fragment() {
                     showTextUpdateDialog("name")
                 }
                 3 -> {
-                    showTextUpdateDialog("phone")
+                    showTextUpdateDialog("surname")
                 }
                 4 -> {
+                    showTextUpdateDialog("phone")
+                }
+                5 -> {
                     showTextUpdateDialog("position")
                 }
             }

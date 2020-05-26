@@ -62,11 +62,11 @@ class LoginActivity : AppCompatActivity() {
         linearLayout.addView(emailET)
         linearLayout.setPadding(10,10,10,10)
         builder.setView(linearLayout)
-        builder.setPositiveButton("Recover") { dialog, which ->
+        builder.setPositiveButton("Recover") { _, _ ->
             val email = emailET.text.toString().trim()
             beginRecovery(email)
         }
-        builder.setNegativeButton("Cancel") {dialog, which ->
+        builder.setNegativeButton("Cancel") { dialog, _ ->
             dialog.dismiss()
         }
         builder.create().show()
@@ -97,19 +97,6 @@ class LoginActivity : AppCompatActivity() {
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this) { task ->
             if (task.isSuccessful) {
                 progressBar.visibility = ProgressBar.INVISIBLE
-                val user = mAuth.currentUser
-                val uid = user!!.uid
-                val data = mutableMapOf<String, Any>()
-                data["email"] = email
-                data["uid"] = uid
-                data["name"] = ""
-                data["surname"] = ""
-                data["position"] = ""
-                data["phone"] = ""
-                data["image"] = ""
-                val database = FirebaseDatabase.getInstance()
-                val reference = database.getReference("Users")
-                reference.child(uid).setValue(data)
                 startActivity(Intent(this, DashboardActivity::class.java))
                 finish()
             } else {
