@@ -1,4 +1,4 @@
-package com.application.messengerforbusiness
+package com.application.messengerforbusiness.models
 
     data class ModelUser(
         var name:String = "", var email: String = "", var phone: String = "",

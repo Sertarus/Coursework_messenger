@@ -86,6 +86,8 @@ class RegisterActivity : AppCompatActivity() {
                     data["name"] = name
                     data["surname"] = surname
                     data["position"] = position
+                    data["onlineStatus"] = "online"
+                    data["typingTo"] = "noOne"
                     data["phone"] = ""
                     data["image"] = ""
                     data["cover"] = ""

@@ -1,6 +1,7 @@
-package com.application.messengerforbusiness
+package com.application.messengerforbusiness.adapters
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,11 +9,15 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.application.messengerforbusiness.ChatActivity
+import com.application.messengerforbusiness.R
+import com.application.messengerforbusiness.models.ModelUser
 import com.squareup.picasso.Picasso
 import java.lang.Exception
 
 class UsersAdapter(var context: Context, usersList: MutableList<ModelUser>):
     RecyclerView.Adapter<UsersAdapter.MyHolder>() {
+
 
     var userList = usersList
 
@@ -30,7 +35,9 @@ class UsersAdapter(var context: Context, usersList: MutableList<ModelUser>):
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.row_users, parent, false)
-        return  MyHolder(view)
+        return MyHolder(
+            view
+        )
     }
 
     override fun getItemCount(): Int {
@@ -41,6 +48,7 @@ class UsersAdapter(var context: Context, usersList: MutableList<ModelUser>):
         val userImage = userList[position].image
         val userName = userList[position].name + " " + userList[position].surname
         val usersEmail = userList[position].email
+        val userUid = userList[position].uid
 
         holder.mNameTV.text = userName
         holder.mEmailTV.text = usersEmail
@@ -53,7 +61,9 @@ class UsersAdapter(var context: Context, usersList: MutableList<ModelUser>):
         }
 
         holder.itemView.setOnClickListener{
-            Toast.makeText(context, usersEmail, Toast.LENGTH_SHORT).show()
+            val intent = Intent(context, ChatActivity::class.java)
+            intent.putExtra("hisUid", userUid)
+            context.startActivity(intent)
         }
 
     }

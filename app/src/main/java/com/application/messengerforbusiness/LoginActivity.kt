@@ -94,9 +94,14 @@ class LoginActivity : AppCompatActivity() {
 
     private fun loginUser(email: String, password: String) {
         progressBar.visibility = ProgressBar.VISIBLE
+        val database = FirebaseDatabase.getInstance()
+        val ref = database.getReference("Users")
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this) { task ->
             if (task.isSuccessful) {
                 progressBar.visibility = ProgressBar.INVISIBLE
+                val data = mutableMapOf<String, Any>()
+                data["onlineStatus"] = "online"
+                ref.child(mAuth.currentUser!!.uid).updateChildren(data)
                 startActivity(Intent(this, DashboardActivity::class.java))
                 finish()
             } else {

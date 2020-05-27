@@ -60,6 +60,16 @@ class DashboardActivity : AppCompatActivity() {
                     ft3.commit()
                     return@setOnNavigationItemSelectedListener true
                 }
+
+                R.id.navigator_chat -> {
+                    actionBar.title = "Chats"
+                    val fragment4 = ChatListFragment()
+                    val ft4 = supportFragmentManager.beginTransaction()
+                    ft4.replace(R.id.content, fragment4, "")
+                    ft4.commit()
+                    return@setOnNavigationItemSelectedListener true
+                }
+
                 else -> return@setOnNavigationItemSelectedListener true
             }
         }
@@ -76,19 +86,6 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val id = item.itemId
-        if (id == R.id.action_logout) {
-            firebaseAuth.signOut()
-            checkUserStatus()
-        }
-        return super.onOptionsItemSelected(item)
-    }
 
     override fun onBackPressed() {
         super.onBackPressed()

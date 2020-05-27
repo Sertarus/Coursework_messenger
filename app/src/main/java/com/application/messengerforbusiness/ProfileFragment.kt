@@ -11,10 +11,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.TextUtils
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
@@ -116,7 +114,6 @@ class ProfileFragment : Fragment() {
                     } catch (e: Exception) {
 
                     }
-
                 }
             }
         })
@@ -386,5 +383,39 @@ class ProfileFragment : Fragment() {
             }
         }
         builder.create().show()
+    }
+
+    private fun checkUserStatus() {
+        val user = mAuth.currentUser
+        if (user != null) {
+
+        }
+        else {
+            startActivity(Intent(activity, MainActivity::class.java))
+            activity?.finish()
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        setHasOptionsMenu(true)
+        super.onCreate(savedInstanceState)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_main, menu)
+        val item = menu.findItem(R.id.action_search)
+        if (item != null) {
+            item.isVisible = false
+        }
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id = item.itemId
+        if (id == R.id.action_logout) {
+            mAuth.signOut()
+            checkUserStatus()
+        }
+        return super.onOptionsItemSelected(item)
     }
 }
