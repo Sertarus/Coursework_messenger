@@ -55,10 +55,8 @@ class UsersFragment : Fragment() {
                 usersList.clear()
                 for (data in p0.children) {
                     val modelUser = data.getValue(ModelUser::class.java)
-                    if (!modelUser?.uid.equals(fUser?.uid)) {
-                        if (modelUser != null) {
+                    if (!modelUser?.uid.equals(fUser?.uid) and !modelUser!!.deleted) {
                             usersList.add(modelUser)
-                        }
                     }
                     if (activity?.applicationContext != null) {
                         adapterUsers =

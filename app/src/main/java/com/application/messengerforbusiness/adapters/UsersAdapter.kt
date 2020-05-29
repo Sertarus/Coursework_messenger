@@ -8,8 +8,11 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
+import com.application.messengerforbusiness.AnotherProfileActivity
 import com.application.messengerforbusiness.ChatActivity
+import com.application.messengerforbusiness.ProfileFragment
 import com.application.messengerforbusiness.R
 import com.application.messengerforbusiness.models.ModelUser
 import com.squareup.picasso.Picasso
@@ -18,10 +21,9 @@ import java.lang.Exception
 class UsersAdapter(var context: Context, usersList: MutableList<ModelUser>):
     RecyclerView.Adapter<UsersAdapter.MyHolder>() {
 
+    private var userList = usersList
 
-    var userList = usersList
-
-    class MyHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
+    class MyHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var mAvatarIV: ImageView
         var mNameTV: TextView
         var mEmailTV: TextView
@@ -53,18 +55,36 @@ class UsersAdapter(var context: Context, usersList: MutableList<ModelUser>):
         holder.mNameTV.text = userName
         holder.mEmailTV.text = usersEmail
         try {
-            Picasso.get().load(userImage).
-            placeholder(R.drawable.ic_default_image).into(holder.mAvatarIV)
-        }
-        catch (e: Exception) {
+            Picasso.get().load(userImage).placeholder(R.drawable.ic_default_image)
+                .into(holder.mAvatarIV)
+        } catch (e: Exception) {
 
         }
 
-        holder.itemView.setOnClickListener{
-            val intent = Intent(context, ChatActivity::class.java)
-            intent.putExtra("hisUid", userUid)
-            context.startActivity(intent)
-        }
+        holder.itemView.setOnClickListener {
+            val options = arrayOf(
+                "Profile",
+                "Chat"
+            )
+            val builder = AlertDialog.Builder(context)
+            builder.setTitle("Choose action")
+            builder.setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        val intent = Intent(context, AnotherProfileActivity::class.java)
+                        intent.putExtra("hisUid", userUid)
+                        context.startActivity(intent)
 
+                    }
+                    1 -> {
+                        val intent = Intent(context, ChatActivity::class.java)
+                        intent.putExtra("hisUid", userUid)
+                        context.startActivity(intent)
+                    }
+                }
+            }
+            builder.create().show()
+
+        }
     }
 }

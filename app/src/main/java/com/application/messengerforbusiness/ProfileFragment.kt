@@ -17,7 +17,10 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.application.messengerforbusiness.models.ModelUser
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.auth.EmailAuthCredential
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
@@ -25,6 +28,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.FirebaseStorage.getInstance
 import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.dialog_update_password.*
 import java.lang.Exception
 
 /**
@@ -46,7 +50,10 @@ class ProfileFragment : Fragment() {
     protected lateinit var positionTV: TextView
     protected lateinit var coverIV: ImageView
     protected lateinit var fab: FloatingActionButton
+    protected lateinit var adminFab: FloatingActionButton
     protected lateinit var progressBar: ProgressBar
+    protected lateinit var deletedListener: ValueEventListener
+    protected lateinit var refForDeleted: DatabaseReference
 
     val CAMERA_REQUEST_CODE = 100
     val STORAGE_REQUEST_CODE = 200
@@ -56,6 +63,7 @@ class ProfileFragment : Fragment() {
     protected lateinit var cameraPermissions: Array<String>
     protected lateinit var imageUri: Uri
     protected lateinit var profileOrCoverPhoto: String
+    protected var hasAdministrativePrivileges = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -77,6 +85,7 @@ class ProfileFragment : Fragment() {
         phoneTV = view.findViewById(R.id.phoneTv)
         positionTV = view.findViewById(R.id.positionTV)
         fab = view.findViewById(R.id.floatingButton)
+        adminFab = view.findViewById(R.id.floatingAdminButton)
         progressBar = ProgressBar(activity as Context)
         cameraPermissions = arrayOf(
             Manifest.permission.CAMERA,
@@ -99,15 +108,19 @@ class ProfileFragment : Fragment() {
                     val position = it.child("position").value
                     val image = it.child("image").value
                     val cover = it.child("cover").value
+                    if (it.child("hasAdministrativePrivileges").value != null) {
+                        hasAdministrativePrivileges =
+                            it.child("hasAdministrativePrivileges").value as Boolean
+                    }
                     val fullName = name.toString() + " " + surname.toString()
                     nameTV.text = fullName
                     emailTV.text = email as CharSequence?
                     phoneTV.text = phone as CharSequence?
                     positionTV.text = position as CharSequence?
                     try {
-                        Picasso.get().load(image as String?).into(avatarIV)
+                        Picasso.get().load(image as String?).placeholder(R.drawable.ic_default_image).into(avatarIV)
                     } catch (e: Exception) {
-                        Picasso.get().load(R.drawable.ic_default_image).into(avatarIV)
+
                     }
                     try {
                         Picasso.get().load(cover as String?).into(coverIV)
@@ -122,7 +135,99 @@ class ProfileFragment : Fragment() {
             showEditProfileDialog()
         }
 
+        adminFab.setOnClickListener {
+            if (hasAdministrativePrivileges) {
+                showAdminOptionsDialog()
+            } else {
+                Toast.makeText(
+                    activity,
+                    "Only users with administrator privileges can handle this",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
         return view
+    }
+
+    private fun showAdminOptionsDialog() {
+        val options = arrayOf(
+            "Add user",
+            "Delete user",
+            "Add task"
+        )
+        val builder = AlertDialog.Builder(activity as Context)
+        builder.setTitle("Choose action")
+        builder.setItems(options) { _, which ->
+            when (which) {
+                0 -> {
+                    startActivity(Intent(activity, RegisterActivity::class.java))
+                }
+                1 -> {
+                    showDeleteUserDialog()
+                }
+                2 -> {
+                    showCreateTaskDialog()
+                }
+            }
+        }
+        builder.create().show()
+    }
+
+    private fun showCreateTaskDialog() {
+        val view = LayoutInflater.from(activity).inflate(R.layout.dialog_create_task, null)
+        val receiverET: EditText = view.findViewById(R.id.receiverEmailET)
+        val taskNameET: EditText = view.findViewById(R.id.taskNameET)
+        val descriptionET: EditText = view.findViewById(R.id.descriptionET)
+        val deadlineET: EditText = view.findViewById(R.id.deadlineET)
+        val button: Button = view.findViewById(R.id.createTaskButton)
+        val builder = AlertDialog.Builder(activity as Context)
+        builder.setView(view)
+        val ad = builder.create()
+        ad.show()
+        button.setOnClickListener {
+            val data = mutableMapOf<String, Any>()
+            val dbRef = FirebaseDatabase.getInstance().reference
+            data["creator"] = user.email.toString()
+            data["receiver"] = receiverET.text.toString()
+            data["taskName"] = taskNameET.text.toString()
+            data["description"] = descriptionET.text.toString()
+            data["deadline"] = deadlineET.text.toString()
+            data["timeStamp"] = System.currentTimeMillis().toString()
+            dbRef.child("Tasks").push().setValue(data)
+            Toast.makeText(activity, "Task created", Toast.LENGTH_SHORT).show()
+            ad.dismiss()
+        }
+    }
+
+    private fun showDeleteUserDialog() {
+        val view = LayoutInflater.from(activity).inflate(R.layout.dialog_delete_user, null)
+        val emailET: EditText = view.findViewById(R.id.emailET)
+        val button: Button = view.findViewById(R.id.deleteUserButton)
+        val builder = AlertDialog.Builder(activity as Context)
+        builder.setView(view)
+        builder.create().show()
+        button.setOnClickListener {
+            refForDeleted = FirebaseDatabase.getInstance().getReference("Users")
+            deletedListener = refForDeleted.addValueEventListener(object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    for (ds in p0.children) {
+                        val user = ds.getValue(ModelUser :: class.java)
+                        if (user!!.email == emailET.text.toString()) {
+                            val data = mutableMapOf<String, Any>()
+                            data["deleted"] = true
+                            ds.ref.updateChildren(data)
+                            Toast.makeText(activity, "User deleted", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+
+            })
+        }
     }
 
     private fun checkStoragePermission(): Boolean {
@@ -256,7 +361,7 @@ class ProfileFragment : Fragment() {
                 progressBar.visibility = ProgressBar.INVISIBLE
                 Toast.makeText(activity, it.message, Toast.LENGTH_SHORT).show()
             }
-        }.addOnFailureListener{
+        }.addOnFailureListener {
             progressBar.visibility = ProgressBar.INVISIBLE
             Toast.makeText(activity, it.message, Toast.LENGTH_SHORT).show()
         }
@@ -289,7 +394,8 @@ class ProfileFragment : Fragment() {
             "Edit name",
             "Edit surname",
             "Edit phone",
-            "Edit Position"
+            "Edit Position",
+            "Change password"
         )
         val builder = AlertDialog.Builder(activity as Context)
         builder.setTitle("Choose action")
@@ -315,9 +421,54 @@ class ProfileFragment : Fragment() {
                 5 -> {
                     showTextUpdateDialog("position")
                 }
+                6 -> {
+                    showChangePasswordDialog()
+                }
             }
         }
         builder.create().show()
+    }
+
+    private fun showChangePasswordDialog() {
+        val view = LayoutInflater.from(activity).inflate(R.layout.dialog_update_password, null)
+        val passwordET: EditText = view.findViewById(R.id.passwordET)
+        val newPasswordET: EditText = view.findViewById(R.id.cPasswordET)
+        val button: Button = view.findViewById(R.id.updatePasswordButton)
+        val builder = AlertDialog.Builder(activity as Context)
+        builder.setView(view)
+        builder.create().show()
+        button.setOnClickListener {
+            val oldPassword = passwordET.text.toString().trim()
+            val newPassword = newPasswordET.text.toString().trim()
+            if (TextUtils.isEmpty(oldPassword)) {
+                Toast.makeText(activity, "Enter your current password", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            if (newPassword.length < 6) {
+                Toast.makeText(
+                    activity,
+                    "Password length must atleast 6 characters",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+            updatePassword(oldPassword, newPassword)
+        }
+    }
+
+    private fun updatePassword(oldPassword: String, newPassword: String) {
+        val user = mAuth.currentUser
+
+        val authCredential = EmailAuthProvider.getCredential(user!!.email!!, oldPassword)
+        user.reauthenticate(authCredential).addOnSuccessListener {
+            user.updatePassword(newPassword).addOnSuccessListener {
+                Toast.makeText(activity, "Password updated", Toast.LENGTH_SHORT).show()
+            }.addOnFailureListener {
+                Toast.makeText(activity, it.message, Toast.LENGTH_SHORT).show()
+            }
+        }.addOnFailureListener {
+            Toast.makeText(activity, it.message, Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun showTextUpdateDialog(s: String) {
@@ -376,8 +527,7 @@ class ProfileFragment : Fragment() {
                 deleteCurrentImage()
                 if (profileOrCoverPhoto == "image") {
                     Picasso.get().load(R.drawable.ic_default_image).into(avatarIV)
-                }
-                else if (profileOrCoverPhoto == "cover") {
+                } else if (profileOrCoverPhoto == "cover") {
                     coverIV.setImageResource(android.R.color.transparent)
                 }
             }
@@ -389,8 +539,7 @@ class ProfileFragment : Fragment() {
         val user = mAuth.currentUser
         if (user != null) {
 
-        }
-        else {
+        } else {
             startActivity(Intent(activity, MainActivity::class.java))
             activity?.finish()
         }

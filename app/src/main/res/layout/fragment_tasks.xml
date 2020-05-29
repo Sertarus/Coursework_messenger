@@ -3,16 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HomeFragment">
+    tools:context=".TasksFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="Home"
-        android:textAlignment="center"
-        android:gravity="center"
-        android:textSize="30sp"/>
+        android:id="@+id/tasksRecyclerView"/>
 
 
 </FrameLayout>

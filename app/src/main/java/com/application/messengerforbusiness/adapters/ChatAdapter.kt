@@ -36,7 +36,7 @@ class ChatAdapter(
         var timeTV: TextView = itemView.findViewById(R.id.timeTV)
         var isSeenTV: TextView = itemView.findViewById(R.id.isSeenTV)
         var messageLayout: LinearLayout = itemView.findViewById(R.id.messageLayout)
-
+        var messageIV: ImageView = itemView.findViewById(R.id.messageIV)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyHolder {
@@ -71,12 +71,23 @@ class ChatAdapter(
     override fun onBindViewHolder(holder: MyHolder, position: Int) {
         val message = chatList[position].message
         val timeStamp = chatList[position].timeStamp
+        val type = chatList[position].type
         val cal = Calendar.getInstance(Locale.ENGLISH)
         if (timeStamp.toLongOrNull() != null) {
             cal.timeInMillis = timeStamp.toLongOrNull()!!
         }
         val dateTime = android.text.format.DateFormat
             .format("dd/MM/yyyy hh:mm aa", cal).toString()
+
+        if (type == "text") {
+            holder.messageTV.visibility = View.VISIBLE
+            holder.messageIV.visibility = View.GONE
+        }
+        else {
+            holder.messageTV.visibility = View.GONE
+            holder.messageIV.visibility = View.VISIBLE
+            Picasso.get().load(message).placeholder(R.drawable.ic_image).into(holder.messageIV)
+        }
 
         holder.messageTV.text = message
         holder.timeTV.text = dateTime
@@ -92,7 +103,7 @@ class ChatAdapter(
         holder.messageLayout.setOnClickListener {
             val builder = AlertDialog.Builder(context)
             builder.setTitle("Delete")
-            builder.setMessage("Art you sure to delete this message?")
+            builder.setMessage("Are you sure to delete this message?")
             builder.setPositiveButton("Delete", object : DialogInterface.OnClickListener {
                 override fun onClick(dialog: DialogInterface?, which: Int) {
                     deleteMessage(position)

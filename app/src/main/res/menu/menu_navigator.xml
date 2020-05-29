@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:id="@+id/navigator_home"
-        android:title="Home"
+        android:title="Tasks"
         android:icon="@drawable/ic_home"/>
     <item android:id="@+id/navigator_profile"
         android:title="Profile"

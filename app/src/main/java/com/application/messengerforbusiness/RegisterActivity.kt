@@ -4,10 +4,10 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Patterns
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.Toast
+import android.view.View
+import android.widget.*
+import com.google.firebase.FirebaseApp
+import com.google.firebase.FirebaseOptions
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_register.*
@@ -23,6 +23,8 @@ class RegisterActivity : AppCompatActivity() {
     protected lateinit var mAddUserButton: Button
     protected lateinit var progressBar: ProgressBar
     protected lateinit var mDatabase: FirebaseDatabase
+    lateinit var spinner : Spinner
+    var hasAdministrativePrivileges: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +42,10 @@ class RegisterActivity : AppCompatActivity() {
         mPasswordET = findViewById(R.id.passwordET)
         mPasswordCheckET = findViewById(R.id.passwordCheckET)
         mAddUserButton = findViewById(R.id.addUserButton)
+        spinner = findViewById(R.id.spinner)
+        val items = arrayOf("No", "Yes")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, items)
+        spinner.adapter = adapter
 
         mDatabase = FirebaseDatabase.getInstance()
 
@@ -69,16 +75,46 @@ class RegisterActivity : AppCompatActivity() {
                 registerUser(name, surname, position, eMail, password)
             }
         }
+        spinner.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                when (position) {
+                    0 -> {
+                        hasAdministrativePrivileges = false
+                    }
+                    1 -> {
+                        hasAdministrativePrivileges = true
+                    }
+                }
+            }
+
+        })
     }
 
     private fun registerUser(name: String, surname: String, position: String, eMail: String, password: String) {
         progressBar.visibility = ProgressBar.VISIBLE
         val mAuth = FirebaseAuth.getInstance()
-        mAuth.createUserWithEmailAndPassword(eMail, password)
+        val firebaseOptionsBuilder = FirebaseOptions.Builder()
+        firebaseOptionsBuilder.setApiKey("")
+        firebaseOptionsBuilder.setDatabaseUrl("")
+        firebaseOptionsBuilder.setProjectId("")
+        firebaseOptionsBuilder.setApplicationId("")
+        val firebaseOptions = firebaseOptionsBuilder.build()
+
+        val newAuth = FirebaseApp.initializeApp(this, firebaseOptions, "second_auth_" + System.currentTimeMillis().toString())
+        FirebaseAuth.getInstance(newAuth).createUserWithEmailAndPassword(eMail, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     progressBar.visibility = ProgressBar.INVISIBLE
-                    val user = mAuth.currentUser
+                    val user = task.result!!.user
                     val uid = user!!.uid
                     val data = mutableMapOf<String, Any>()
                     data["email"] = eMail
@@ -86,17 +122,18 @@ class RegisterActivity : AppCompatActivity() {
                     data["name"] = name
                     data["surname"] = surname
                     data["position"] = position
-                    data["onlineStatus"] = "online"
+                    data["onlineStatus"] = "none"
                     data["typingTo"] = "noOne"
                     data["phone"] = ""
                     data["image"] = ""
                     data["cover"] = ""
+                    data["hasAdministrativePrivileges"] = hasAdministrativePrivileges
+                    data["deleted"] = false
                     val database = FirebaseDatabase.getInstance()
                     val reference = database.getReference("Users")
                     reference.child(uid).setValue(data)
 
                     Toast.makeText(this, "Registered...\n" + user.email, Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, DashboardActivity::class.java))
                     finish()
                 } else {
                     progressBar.visibility = ProgressBar.INVISIBLE

@@ -16,8 +16,8 @@
         
         <com.blogspot.atifsoftwares.circularimageview.CircularImageView
             android:id="@+id/profileIV"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_default_image"
             app:c_background_color="@color/colorPrimaryDark"/>
@@ -44,6 +44,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Online"
+                android:textSize="10sp"
                 android:textColor="@color/white"
                 android:textStyle="bold"/>
 
@@ -65,6 +66,13 @@
         android:background="@color/white"
         android:gravity="center"
         android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/attachBtn"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:background="@color/colorPrimaryDark"
+            android:src="@drawable/ic_attach"/>
 
         <EditText
             android:id="@+id/messageEt"
